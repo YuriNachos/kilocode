@@ -26,37 +26,125 @@ export interface ApprovalDecision {
 }
 
 /**
+ * Splits a command into sub-commands by chain operators (&&, |, ||, ;)
+ * This prevents command chaining bypasses where e.g. "git status; rm -rf /"
+ * would be allowed because it starts with allowed "git status"
+ *
+ * @param command - The command string to split
+ * @returns Array of sub-commands
+ *
+ * @example
+ * splitCommand("git status; rm -rf /") // ["git status", "rm -rf /"]
+ * splitCommand("npm install && npm test") // ["npm install", "npm test"]
+ * splitCommand("ls | grep foo") // ["ls ", " grep foo"]
+ */
+function splitCommand(command: string): string[] {
+	// Split by &&, ||, |, or ; followed by optional whitespace
+	// We need to be careful to preserve the operators as separate tokens
+	const parts: string[] = []
+	let current = ""
+
+	// Process the command character by character
+	let i = 0
+	while (i < command.length) {
+		// Check for && operator
+		if (i + 1 < command.length && command[i] === "&" && command[i + 1] === "&") {
+			parts.push(current.trim())
+			current = ""
+			i += 2
+			continue
+		}
+		// Check for || operator
+		if (i + 1 < command.length && command[i] === "|" && command[i + 1] === "|") {
+			parts.push(current.trim())
+			current = ""
+			i += 2
+			continue
+		}
+		// Check for | operator (single pipe)
+		if (command[i] === "|") {
+			parts.push(current.trim())
+			current = ""
+			i += 1
+			continue
+		}
+		// Check for ; operator
+		if (command[i] === ";") {
+			parts.push(current.trim())
+			current = ""
+			i += 1
+			continue
+		}
+		current += command[i]
+		i++
+	}
+
+	if (current.trim()) {
+		parts.push(current.trim())
+	}
+
+	// Filter out empty parts
+	return parts.filter((part) => part.length > 0)
+}
+
+/**
  * Helper function to check if a command matches allowed/denied patterns
  * Supports hierarchical matching:
  * - "git" matches "git status", "git commit", etc.
  * - "git status" matches "git status --short", "git status -v", etc.
  * - Exact match: "git status --short" only matches "git status --short"
+ *
+ * IMPORTANT: This function also splits commands by chain operators (&&, |, ||, ;)
+ * to prevent bypassing security restrictions. Each sub-command must match the patterns.
  */
 function matchesCommandPattern(command: string, patterns: string[]): boolean {
 	if (patterns.length === 0) return false
 
 	const normalizedCommand = command.trim()
 
-	return patterns.some((pattern) => {
-		const normalizedPattern = pattern.trim()
+	// Split command by chain operators to prevent bypasses
+	const subCommands = splitCommand(normalizedCommand)
 
-		// Wildcard matches everything
-		if (normalizedPattern === "*") return true
+	// If there are multiple sub-commands, ALL must match the patterns
+	// This prevents "allowed; disallowed" bypasses
+	for (const subCommand of subCommands) {
+		let matches = false
 
-		// Exact match
-		if (normalizedPattern === normalizedCommand) return true
+		for (const pattern of patterns) {
+			const normalizedPattern = pattern.trim()
 
-		// Hierarchical match: pattern is a prefix of the command
-		// Must match word boundaries to avoid false positives
-		// e.g., "git" matches "git status" but not "gitignore"
-		if (normalizedCommand.startsWith(normalizedPattern)) {
-			// Check if it's followed by whitespace or end of string
-			const nextChar = normalizedCommand[normalizedPattern.length]
-			return nextChar === undefined || nextChar === " " || nextChar === "\t"
+			// Wildcard matches everything
+			if (normalizedPattern === "*") {
+				matches = true
+				break
+			}
+
+			// Exact match
+			if (normalizedPattern === subCommand) {
+				matches = true
+				break
+			}
+
+			// Hierarchical match: pattern is a prefix of the command
+			// Must match word boundaries to avoid false positives
+			// e.g., "git" matches "git status" but not "gitignore"
+			if (subCommand.startsWith(normalizedPattern)) {
+				// Check if it's followed by whitespace or end of string
+				const nextChar = subCommand[normalizedPattern.length]
+				if (nextChar === undefined || nextChar === " " || nextChar === "\t") {
+					matches = true
+					break
+				}
+			}
 		}
 
-		return false
-	})
+		// If any sub-command doesn't match, the whole command doesn't match
+		if (!matches) {
+			return false
+		}
+	}
+
+	return true
 }
 
 /**
@@ -206,10 +294,17 @@ function getCommandApprovalDecision(
 		configExecute: config.execute,
 	})
 
+	// Split command into sub-commands to check each part
+	// This prevents command chaining bypasses
+	const subCommands = splitCommand(command)
+
 	// Check denied list first (takes precedence)
-	if (matchesCommandPattern(command, deniedCommands)) {
-		logs.debug("Command matches denied pattern", "approvalDecision", { command })
-		return isCIMode ? { action: "auto-reject", message: CI_MODE_MESSAGES.AUTO_REJECTED } : { action: "manual" }
+	// Check each sub-command against denied patterns
+	for (const subCommand of subCommands) {
+		if (matchesCommandPattern(subCommand, deniedCommands)) {
+			logs.debug("Sub-command matches denied pattern", "approvalDecision", { subCommand, fullCommand: command })
+			return isCIMode ? { action: "auto-reject", message: CI_MODE_MESSAGES.AUTO_REJECTED } : { action: "manual" }
+		}
 	}
 
 	// If allowed list is empty, don't allow any commands

@@ -397,6 +397,196 @@ describe("approvalDecision", () => {
 					expect(decision.action).toBe("manual")
 				})
 			})
+
+			describe("command chaining security", () => {
+				it("should NOT allow commands with ; operator when second part is denied", () => {
+					const message = createMessage("command", JSON.stringify({ command: "git status; rm -rf /" }))
+					const config = {
+						...createBaseConfig(),
+						execute: {
+							enabled: true,
+							allowed: ["git"],
+							denied: ["rm"],
+						},
+					}
+					const decision = getApprovalDecision(message, config, false)
+					expect(decision.action).toBe("manual")
+				})
+
+				it("should NOT allow commands with && operator when second part is denied", () => {
+					const message = createMessage("command", JSON.stringify({ command: "git status && rm -rf /" }))
+					const config = {
+						...createBaseConfig(),
+						execute: {
+							enabled: true,
+							allowed: ["git"],
+							denied: ["rm"],
+						},
+					}
+					const decision = getApprovalDecision(message, config, false)
+					expect(decision.action).toBe("manual")
+				})
+
+				it("should NOT allow commands with || operator when second part is denied", () => {
+					const message = createMessage("command", JSON.stringify({ command: "git status || rm -rf /" }))
+					const config = {
+						...createBaseConfig(),
+						execute: {
+							enabled: true,
+							allowed: ["git"],
+							denied: ["rm"],
+						},
+					}
+					const decision = getApprovalDecision(message, config, false)
+					expect(decision.action).toBe("manual")
+				})
+
+				it("should NOT allow commands with | operator when second part is not in allowed", () => {
+					const message = createMessage("command", JSON.stringify({ command: "cat file.txt | grep secret" }))
+					const config = {
+						...createBaseConfig(),
+						execute: {
+							enabled: true,
+							allowed: ["cat"],
+							denied: [],
+						},
+					}
+					const decision = getApprovalDecision(message, config, false)
+					expect(decision.action).toBe("manual")
+				})
+
+				it("should allow commands with ; operator when all parts are allowed", () => {
+					const message = createMessage("command", JSON.stringify({ command: "git status; git log" }))
+					const config = {
+						...createBaseConfig(),
+						execute: {
+							enabled: true,
+							allowed: ["git"],
+							denied: [],
+						},
+					}
+					const decision = getApprovalDecision(message, config, false)
+					expect(decision.action).toBe("auto-approve")
+				})
+
+				it("should allow commands with && operator when all parts are allowed", () => {
+					const message = createMessage("command", JSON.stringify({ command: "npm install && npm test" }))
+					const config = {
+						...createBaseConfig(),
+						execute: {
+							enabled: true,
+							allowed: ["npm"],
+							denied: [],
+						},
+					}
+					const decision = getApprovalDecision(message, config, false)
+					expect(decision.action).toBe("auto-approve")
+				})
+
+				it("should allow commands with || operator when all parts are allowed", () => {
+					const message = createMessage("command", JSON.stringify({ command: "npm install || npm rebuild" }))
+					const config = {
+						...createBaseConfig(),
+						execute: {
+							enabled: true,
+							allowed: ["npm"],
+							denied: [],
+						},
+					}
+					const decision = getApprovalDecision(message, config, false)
+					expect(decision.action).toBe("auto-approve")
+				})
+
+				it("should allow commands with | operator when all parts are allowed", () => {
+					const message = createMessage("command", JSON.stringify({ command: "cat file.txt | grep pattern" }))
+					const config = {
+						...createBaseConfig(),
+						execute: {
+							enabled: true,
+							allowed: ["cat", "grep"],
+							denied: [],
+						},
+					}
+					const decision = getApprovalDecision(message, config, false)
+					expect(decision.action).toBe("auto-approve")
+				})
+
+				it("should allow wildcards to match chained commands", () => {
+					const message = createMessage("command", JSON.stringify({ command: "git status; rm -rf /" }))
+					const config = {
+						...createBaseConfig(),
+						execute: {
+							enabled: true,
+							allowed: ["*"],
+							denied: [],
+						},
+					}
+					const decision = getApprovalDecision(message, config, false)
+					expect(decision.action).toBe("auto-approve")
+				})
+
+				it("should respect denied list even with wildcard in allowed", () => {
+					const message = createMessage("command", JSON.stringify({ command: "git status; rm -rf /" }))
+					const config = {
+						...createBaseConfig(),
+						execute: {
+							enabled: true,
+							allowed: ["*"],
+							denied: ["rm"],
+						},
+					}
+					const decision = getApprovalDecision(message, config, false)
+					expect(decision.action).toBe("manual")
+				})
+
+				it("should handle multiple chained operators", () => {
+					const message = createMessage(
+						"command",
+						JSON.stringify({ command: "git status; npm install && npm test" }),
+					)
+					const config = {
+						...createBaseConfig(),
+						execute: {
+							enabled: true,
+							allowed: ["git", "npm"],
+							denied: [],
+						},
+					}
+					const decision = getApprovalDecision(message, config, false)
+					expect(decision.action).toBe("auto-approve")
+				})
+
+				it("should reject if any part of multi-chain command is denied", () => {
+					const message = createMessage(
+						"command",
+						JSON.stringify({ command: "git status; npm install && rm -rf /" }),
+					)
+					const config = {
+						...createBaseConfig(),
+						execute: {
+							enabled: true,
+							allowed: ["git", "npm"],
+							denied: ["rm"],
+						},
+					}
+					const decision = getApprovalDecision(message, config, false)
+					expect(decision.action).toBe("manual")
+				})
+
+				it("should handle commands with spaces around operators", () => {
+					const message = createMessage("command", JSON.stringify({ command: "git status  ;  rm -rf /" }))
+					const config = {
+						...createBaseConfig(),
+						execute: {
+							enabled: true,
+							allowed: ["git"],
+							denied: ["rm"],
+						},
+					}
+					const decision = getApprovalDecision(message, config, false)
+					expect(decision.action).toBe("manual")
+				})
+			})
 		})
 
 		describe("followup questions", () => {
