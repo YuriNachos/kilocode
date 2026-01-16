@@ -1,0 +1,65 @@
+# Kilo Code Documentation
+
+Kilo Code is an open-source VS Code extension that accelerates development with AI-driven code generation and task automation.
+
+## Overview
+
+Kilo Code is an all-in-one agentic engineering platform that helps developers:
+- Generate code from natural language descriptions
+- Refactor and debug existing code
+- Write and update documentation
+- Answer questions about codebases
+- Automate repetitive tasks
+- Create new files and projects
+
+## Documentation Structure
+
+### Getting Started
+- Installing: https://kilo.ai/docs/getting-started/installing
+- Setting Up: https://kilo.ai/docs/getting-started/setting-up
+- First Task: https://kilo.ai/docs/getting-started/your-first-task
+
+### Basic Usage
+- Chat Interface: https://kilo.ai/docs/basic-usage/the-chat-interface
+- Using Modes: https://kilo.ai/docs/basic-usage/using-modes
+- Settings Management: https://kilo.ai/docs/basic-usage/settings-management
+- Model Selection: https://kilo.ai/docs/basic-usage/model-selection-guide
+- Context Mentions: https://kilo.ai/docs/basic-usage/context-mentions
+
+### Agent Behavior
+- Custom Modes: https://kilo.ai/docs/agent-behavior/custom-modes
+- Custom Instructions: https://kilo.ai/docs/agent-behavior/custom-instructions
+- Custom Rules: https://kilo.ai/docs/agent-behavior/custom-rules
+- Prompt Engineering: https://kilo.ai/docs/agent-behavior/prompt-engineering
+- Skills: https://kilo.ai/docs/agent-behavior/skills
+
+### Core Features
+- Tools Overview: https://kilo.ai/docs/features/tools/tool-use-overview
+- Codebase Indexing: https://kilo.ai/docs/features/codebase-indexing
+- Browser Use: https://kilo.ai/docs/features/browser-use
+- Shell Integration: https://kilo.ai/docs/features/shell-integration
+- MCP (Model Context Protocol): https://kilo.ai/docs/features/mcp/overview
+
+### Advanced Usage
+- Local Models: https://kilo.ai/docs/advanced-usage/local-models
+- Memory Bank: https://kilo.ai/docs/advanced-usage/memory-bank
+- Rate Limits & Costs: https://kilo.ai/docs/advanced-usage/rate-limits-costs
+- Sessions: https://kilo.ai/docs/advanced-usage/sessions
+
+### Modes
+Kilo Code provides specialized modes for different tasks:
+- Code Mode: For general-purpose coding tasks
+- Architect Mode: For planning and technical leadership
+- Ask Mode: For answering questions and providing information
+- Debug Mode: For systematic problem diagnosis
+
+## CLI
+
+The Kilo CLI can be used independently of VS Code:
+https://kilo.ai/docs/cli
+
+## Community
+
+- Discord: https://kilo.ai/discord
+- GitHub: https://github.com/Kilo-Org/kilocode
+- Report Issues: https://github.com/Kilo-Org/kilocode/issues
