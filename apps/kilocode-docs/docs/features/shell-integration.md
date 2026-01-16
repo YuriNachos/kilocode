@@ -15,6 +15,60 @@ Shell integration is automatically enabled in Kilo Code and connects directly to
 
 When Kilo Code needs to perform tasks like installing dependencies, starting a development server, or analyzing build errors, shell integration works behind the scenes to make these interactions smooth and effective.
 
+## Platform-Specific Information
+
+### macOS & Linux
+
+Shell integration works automatically on macOS and Linux with VSCode's built-in shell integration. No additional setup is required for most users.
+
+**Common shells on macOS/Linux:**
+
+- **Bash** (default on many Linux systems)
+- **Zsh** (default on macOS since Catalina)
+- **Fish**
+
+If you experience issues, ensure your shell configuration includes the VSCode shell integration:
+
+**Bash** (`~/.bashrc`):
+
+```bash
+[[ "$TERM_PROGRAM" == "vscode" ]] && . "$(code --locate-shell-integration-path bash)"
+```
+
+**Zsh** (`~/.zshrc`):
+
+```bash
+[[ "$TERM_PROGRAM" == "vscode" ]] && . "$(code --locate-shell-integration-path zsh)"
+```
+
+**Fish** (`~/.config/fish/config.fish`):
+
+```fish
+string match -q "$TERM_PROGRAM" "vscode"; and . (code --locate-shell-integration-path fish)
+```
+
+**For Windsurf users**, replace `vscode` with `surf` in the commands above:
+
+```bash
+[[ "$TERM_PROGRAM" == "surf" ]] && . "$(code --locate-shell-integration-path zsh)"
+```
+
+**Popular shell customizations** that work with Kilo Code:
+
+- [Oh My Zsh](https://ohmyz.sh/) - Enable the "Oh My Zsh Integration" setting
+- Powerlevel10k - Enable the "Powerlevel10k Integration" setting
+- Starship prompt - Works out of the box
+
+### Windows
+
+Windows users have multiple options for shell integration:
+
+- **PowerShell** - Requires execution policy configuration
+- **WSL** (Windows Subsystem for Linux) - Two integration methods available
+- **Git Bash** - Works with VSCode's bash integration
+
+See the [Windows-specific section](#powershell-execution-policy-windows) below for detailed setup instructions.
+
 ## Getting Started with Shell Integration
 
 Shell integration is built into Kilo Code and works automatically in most cases. If you see "Shell Integration Unavailable" messages or experience issues with command execution, try these solutions:
