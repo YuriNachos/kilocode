@@ -26,6 +26,7 @@ const sidebars: SidebarsConfig = {
 				"basic-usage/using-modes",
 				"basic-usage/autocomplete",
 				"basic-usage/context-mentions",
+				"basic-usage/slash-commands",
 				{
 					type: "category",
 					label: "Basic Features",
