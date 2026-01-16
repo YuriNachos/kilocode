@@ -3,6 +3,7 @@
 import { Anthropic } from "@anthropic-ai/sdk"
 
 import { convertAnthropicMessageToGemini } from "../gemini-format"
+import { convertOpenAIToolToGeminiFunction } from "../../../services/continuedev/core/llm/openai-adapters/util/gemini-types"
 
 describe("convertAnthropicMessageToGemini", () => {
 	it("should convert a simple text message", () => {
@@ -462,5 +463,33 @@ describe("convertAnthropicMessageToGemini", () => {
 				parts: [{ text: "Here's my answer" }],
 			},
 		])
+	})
+})
+
+describe("Gemini tool integration", () => {
+	it("should properly convert complex tool schemas", () => {
+		const mockTool = {
+			type: "function" as const,
+			function: {
+				name: "read_file",
+				description: "Read a file",
+				parameters: {
+					type: "object" as const,
+					properties: {
+						path: {
+							type: "string" as const,
+							description: "File path",
+						},
+					},
+					required: ["path"],
+				},
+			},
+		}
+
+		const result = convertOpenAIToolToGeminiFunction(mockTool)
+
+		// Verify Gemini format (uppercase types, no 'type' in wrong places)
+		expect(result.parameters?.type).toBe("OBJECT")
+		expect(result.parameters?.properties?.path?.type).toBe("STRING")
 	})
 })
