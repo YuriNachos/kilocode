@@ -4,23 +4,36 @@ sidebar_label: Connecting To A Provider
 
 # Connecting an AI Provider
 
-Kilo Code requires an API key from an AI model provider to function.
+Kilo Code provides multiple ways to access powerful AI models. You can start using Kilo Code immediately with our built-in credit system, or connect your own API provider for more control.
 
-We recommend these options for accessing the powerful **Claude 4 Sonnet** model:
+## Quick Start with Kilo Credits (Recommended)
 
-- **Kilo Gateway (Recommended):** Provides access to all of the models available through OpenRouter with competitive pricing and free credits to get started. [View pricing](https://kilo.ai/pricing)
-- **OpenRouter:** Provides access to multiple AI models through a single API key. [View pricing](https://openrouter.ai/models?order=pricing-low-to-high).
-- **Anthropic:** Direct access to Claude models. Requires API access approval and may have [rate limits depending on your tier](https://docs.anthropic.com/en/api/rate-limits#requirements-to-advance-tier). See [Anthropic's pricing page](https://www.anthropic.com/pricing#anthropic-api) for details.
+The easiest way to get started is with Kilo Code's built-in credit system:
 
-## Using the Kilo Code Provider
+- **Sign up and get free credits** - Create an account and receive complimentary credits to start coding immediately
+- **Pay at cost** - Buy credits through Kilo at the same rates providers charge us, with transparent pricing
+- **Access 500+ models** - Use credits across multiple providers including Anthropic, OpenAI, Google, and more
+- **No API keys needed** - Start coding without managing multiple API keys or accounts
 
-By default when you install Kilo Code the extension, you'll be prompted to sign in or create an account in the [Kilo Code Provider](/providers/kilocode).
+[Get started with Kilo Credits](https://kilo.ai/pricing)
 
-That will walk you through the account setup and _automatically_ configure Kilo Code properly to get you started. If you'd rather use another provider, you'll need to manually get your API key as described below.
+## Using Kilo Code Provider
 
-## Using another API Provider
+By default when you install Kilo Code, you'll be prompted to sign in or create an account. The setup will:
 
-_Coming soon to Kilo Code Teams and Enterprise!_
+1. Guide you through account creation
+2. Automatically configure your settings
+3. Add free credits to get you started
+4. Have you coding in minutes
+
+## Using Your Own API Provider
+
+If you prefer to use your own API keys, Kilo Code supports connecting to:
+
+- **LLM Routers** - Access multiple models through a single API key (OpenRouter, Requesty)
+- **Direct Providers** - Connect directly to Anthropic, OpenAI, Google, and more
+
+_This option is coming soon to Kilo Code Teams and Enterprise!_
 
 ### Getting Your API Key
 
